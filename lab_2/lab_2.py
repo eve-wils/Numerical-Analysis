@@ -26,7 +26,7 @@ def abs_error(sol, funct_type):
     elif (funct_type == 'b'):
         return  abs(fb(sol) - 0)
     elif (funct_type == 'c'):
-        return  abs(fb(sol) - 0)
+        return  abs(fc(sol) - 0)
     else:
         return "ERROR: incorrect function type"
 
@@ -229,12 +229,67 @@ print(f"Estimated order: {estimate_order(newt_err_c)}")
 
 
 '''Modified Newton's Method'''
-def mod_newt_a ():
-    return None
-def mod_newt_b ():
-    return None
-def mod_newt_c ():
-    return None
+def u_a (x):
+    return fa(x) / fa_prime(x)
+def u_b (x):
+    return fa(x) / fa_prime(x)
+def u_c (x):
+    return fa(x) / fa_prime(x)
+
+def mod_newt_a (x):
+    m = 1 # multiplicity is 1 because there is only 1 root
+    return x - (m * u_a(x))
+def mod_newt_b (x):
+    m = 1 # multiplicity is 1 because there is only 1 root
+    return x - (m * u_b(x))
+def mod_newt_c (x):
+    m = 1 # multiplicity is 1 because there is only 1 root
+    return x - (m * u_c(x))
+
+# Run Mod Newton A
+print("***Mod. Newton Method A***")
+i_a = 0
+pn= 1.63
+mod_newt_err_a = [abs_error(pn, 'a')]
+while(abs_error(pn, 'a') > acceptable_error):
+    pn = mod_newt_a(pn)
+    i_a = i_a + 1
+    error_a = abs_error(pn, 'a')
+    mod_newt_err_a.append(error_a)
+print(f"Solution: {pn}")
+print(f"Iterations: {i_a}")
+print(f"Absolute Error: {error_a}")
+print(f"Estimated order: {estimate_order(mod_newt_err_a)}")
+
+# Run Mod Newton B
+print("***Mod Newton Method B***")
+i_b = 0
+pn= 1.63
+mod_newt_err_b = [abs_error(pn, 'b')]
+while(abs_error(pn, 'b') > acceptable_error):
+    pn = mod_newt_b(pn)
+    i_b = i_b + 1
+    error_b = abs_error(pn, 'b')
+    mod_newt_err_b.append(error_b)
+print(f"Solution: {pn}")
+print(f"Iterations: {i_b}")
+print(f"Absolute Error: {error_b}")
+print(f"Estimated order: {estimate_order(mod_newt_err_b)}")
+
+# Run Mod Newton C
+print("***Mod Newton Method C***")
+i_c = 0
+pn= 1.63
+mod_newt_err_c = [abs_error(pn, 'c')]
+while(abs_error(pn, 'c') > acceptable_error):
+    pn = mod_newt_c(pn)
+    i_c = i_c + 1
+    error_c = abs_error(pn, 'c')
+    mod_newt_err_c.append(error_c)
+print(f"Solution: {pn}")
+print(f"Iterations: {i_c}")
+print(f"Absolute Error: {error_c}")
+print(f"Estimated order: {estimate_order(mod_newt_err_c)}")
 
 '''Cubic Newton's Method'''
 
@@ -247,8 +302,10 @@ def cubic_newt_a ():
 
 sec_a = np.arange(len(sec_err_a))
 newt_a = np.arange(len(newt_err_a))
+mod_newt_a = np.arange(len(mod_newt_err_a))
 plt.plot(sec_a, sec_err_a, label='Secant A', color='blue')
 plt.plot(newt_a, newt_err_a, label='Newton A', color='red')
+plt.plot(mod_newt_a, mod_newt_err_a, label='Mod Newton A', color='yellow')
 # Make the graph readable
 plt.title("Absolute error for four methods on function A")
 plt.xlabel("Iterations")
@@ -260,9 +317,10 @@ plt.show()
 
 sec_b = np.arange(len(sec_err_b))
 newt_b = np.arange(len(newt_err_b))
+mod_newt_b = np.arange(len(mod_newt_err_b))
 plt.plot(sec_b, sec_err_b, label='Secant B', color='blue')
 plt.plot(newt_b, newt_err_b, label='Newton B', color='red')
-
+plt.plot(mod_newt_b, mod_newt_err_b, label='Mod Newton B', color='yellow')
 plt.title("Absolute error for four methods on function B")
 plt.xlabel("Iterations")
 plt.ylabel("Absolute Error")
@@ -273,8 +331,10 @@ plt.show()
 
 sec_c = np.arange(len(sec_err_c))
 newt_c = np.arange(len(newt_err_c))
+mod_newt_c = np.arange(len(mod_newt_err_c))
 plt.plot(sec_c, sec_err_c, label='Secant C', color='blue')
 plt.plot(newt_c, newt_err_c, label='Newton C', color='red')
+plt.plot(mod_newt_c, mod_newt_err_c, label='Mod Newton C', color='yellow')
 plt.title("Absolute error for four methods on function C")
 plt.xlabel("Iterations")
 plt.ylabel("Absolute Error")
