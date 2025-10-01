@@ -1,5 +1,5 @@
 # Lab 1
-# Numerical Analysis
+# Numerical Methods
 # Evelyn Wilson
 # Due Date: September 24
 
