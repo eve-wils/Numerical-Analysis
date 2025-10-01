@@ -31,7 +31,7 @@ def abs_error(sol, funct_type):
         return "ERROR: incorrect function type"
 
 # Define error threshold
-acceptable_error = 1e-15
+acceptable_error = 1e-8
 best_index = 0
 # Function to find order of convergence from data:
 def estimate_order(error_arr):
@@ -45,10 +45,7 @@ def estimate_order(error_arr):
             continue
         alpha = math.log(err2/err1) / math.log(err1/err0)
         vals.append(alpha)
-        diff1 = abs(2 - alpha)
-        if (alpha > best_alpha and alpha <= 2):
-            best_alpha = alpha
-    return best_alpha
+    return np.array(vals)
 
 
 # Define initial value (plotted on desmos)
@@ -232,9 +229,9 @@ print(f"Estimated order: {estimate_order(newt_err_c)}")
 def u_a (x):
     return fa(x) / fa_prime(x)
 def u_b (x):
-    return fa(x) / fa_prime(x)
+    return fb(x) / fb_prime(x)
 def u_c (x):
-    return fa(x) / fa_prime(x)
+    return fc(x) / fc_prime(x)
 
 def mod_newt_a (x):
     m = 1 # multiplicity is 1 because there is only 1 root
@@ -292,20 +289,91 @@ print(f"Absolute Error: {error_c}")
 print(f"Estimated order: {estimate_order(mod_newt_err_c)}")
 
 '''Cubic Newton's Method'''
+# Calculate Cubic Newton's Method for function A
+def fa_dprime(x):
+    return (math.exp(-x**2) * ((4*x**2 - 2)*(x + math.cos(x)) - math.cos(x) - 4*x*(1 - math.sin(x)))) \
+           - 2*math.sin(x) - x*math.cos(x)
+def phi_a (x):
+    return 1 / fa_prime(x)
+def psi_a (x):
+    return (-3/2)*(fa_dprime(x) / (fa_prime(x) ** 3))
+def cubic_newt_a (x):
+    return x - (phi_a(x)*fa(x))-(psi_a(x)*(fa(x)**2))
 
-def cubic_newt_a ():
-    return None
-def cubic_newt_a ():
-    return None
-def cubic_newt_a ():
-    return None
+# Calculate Cubic Newton's Method for function B
+def fb_dprime(x):
+    return 2 * (fa_prime(x)**2 + fa(x) * fa_dprime(x))
+def phi_b (x):
+    return 1 / fb_prime(x)
+def psi_b (x):
+    return (-3/2)*(fb_dprime(x) / (fb_prime(x) ** 3))
+def cubic_newt_b (x):
+    return x - (phi_b(x)*fb(x))-(psi_b(x)*(fb(x)**2))
 
+# Calculate Cubic Newton's Method for function C
+def fc_dprime (x):
+    return 6 *fa(x) * (fa_prime(x) ** 2) + 3 * (fa(x) ** 2) * fa_dprime(x)
+def phi_c (x):
+    return 1 / fc_prime(x)
+def psi_c (x):
+    return (-3/2)*(fc_dprime(x) / (fc_prime(x) ** 3))
+def cubic_newt_c (x):
+    return x - (phi_c(x)*fc(x))-(psi_c(x)*(fc(x)**2))
+
+# Run Cubic Newton A
+print("***Cubic Newton Method A***")
+i_a = 0
+pn= 1.63
+cubic_newt_err_a = [abs_error(pn, 'a')]
+while(abs_error(pn, 'a') > acceptable_error):
+    pn = cubic_newt_a(pn)
+    i_a = i_a + 1
+    error_a = abs_error(pn, 'a')
+    cubic_newt_err_a.append(error_a)
+print(f"Solution: {pn}")
+print(f"Iterations: {i_a}")
+print(f"Absolute Error: {error_a}")
+print(f"Estimated order: {estimate_order(cubic_newt_err_a)}")
+
+# Run Cubic Newton B
+print("***Cubic Newton Method B***")
+i_b = 0
+pn= 1.63
+cubic_newt_err_b = [abs_error(pn, 'b')]
+while(abs_error(pn, 'b') > acceptable_error):
+    pn = cubic_newt_b(pn)
+    i_b = i_b + 1
+    error_b = abs_error(pn, 'b')
+    cubic_newt_err_b.append(error_b)
+print(f"Solution: {pn}")
+print(f"Iterations: {i_b}")
+print(f"Absolute Error: {error_b}")
+print(f"Estimated order: {estimate_order(cubic_newt_err_b)}")
+
+# Run Cubic Newton C
+print("***Cubic Newton Method C***")
+i_c = 0
+pn= 1.63
+cubic_newt_err_c = [abs_error(pn, 'c')]
+while(abs_error(pn, 'c') > acceptable_error):
+    pn = cubic_newt_c(pn)
+    i_c = i_c + 1
+    error_c = abs_error(pn, 'c')
+    cubic_newt_err_c.append(error_c)
+print(f"Solution: {pn}")
+print(f"Iterations: {i_c}")
+print(f"Absolute Error: {error_c}")
+print(f"Estimated order: {estimate_order(cubic_newt_err_c)}")
+
+''' PLOTS: one for each function comparing the four methods'''
 sec_a = np.arange(len(sec_err_a))
 newt_a = np.arange(len(newt_err_a))
 mod_newt_a = np.arange(len(mod_newt_err_a))
+cubic_newt_a = np.arange(len(cubic_newt_err_a))
 plt.plot(sec_a, sec_err_a, label='Secant A', color='blue')
 plt.plot(newt_a, newt_err_a, label='Newton A', color='red')
 plt.plot(mod_newt_a, mod_newt_err_a, label='Mod Newton A', color='yellow')
+plt.plot(cubic_newt_a, cubic_newt_err_a, label='Cubic Newton A', color='green')
 # Make the graph readable
 plt.title("Absolute error for four methods on function A")
 plt.xlabel("Iterations")
@@ -315,12 +383,15 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
+# Plot function B
 sec_b = np.arange(len(sec_err_b))
 newt_b = np.arange(len(newt_err_b))
 mod_newt_b = np.arange(len(mod_newt_err_b))
+cubic_newt_b = np.arange(len(cubic_newt_err_b))
 plt.plot(sec_b, sec_err_b, label='Secant B', color='blue')
 plt.plot(newt_b, newt_err_b, label='Newton B', color='red')
 plt.plot(mod_newt_b, mod_newt_err_b, label='Mod Newton B', color='yellow')
+plt.plot(cubic_newt_b, cubic_newt_err_b, label='Cubic Newton B', color='green')
 plt.title("Absolute error for four methods on function B")
 plt.xlabel("Iterations")
 plt.ylabel("Absolute Error")
@@ -332,9 +403,11 @@ plt.show()
 sec_c = np.arange(len(sec_err_c))
 newt_c = np.arange(len(newt_err_c))
 mod_newt_c = np.arange(len(mod_newt_err_c))
+cubic_newt_c = np.arange(len(cubic_newt_err_c))
 plt.plot(sec_c, sec_err_c, label='Secant C', color='blue')
 plt.plot(newt_c, newt_err_c, label='Newton C', color='red')
 plt.plot(mod_newt_c, mod_newt_err_c, label='Mod Newton C', color='yellow')
+plt.plot(cubic_newt_c, cubic_newt_err_c, label='Cubic Newton C', color='green')
 plt.title("Absolute error for four methods on function C")
 plt.xlabel("Iterations")
 plt.ylabel("Absolute Error")
