@@ -31,21 +31,18 @@ def abs_error(sol, funct_type):
         return "ERROR: incorrect function type"
 
 # Define error threshold
-acceptable_error = 1e-8
+acceptable_error = 1e-13
 best_index = 0
 # Function to find order of convergence from data:
 def estimate_order(error_arr):
-    thresh = 1e-16
     length = len(error_arr)
-    vals = []
-    best_alpha = 0
-    for i in range(length-2):
-        err0, err1, err2 = error_arr[i], error_arr[i+1], error_arr[i+2]
-        if min(err0, err1, err2) <= 1e-12 or max(err0, err1, err2) >= 1e-2:
-            continue
-        alpha = math.log(err2/err1) / math.log(err1/err0)
-        vals.append(alpha)
-    return np.array(vals)
+    if (length >= 3) :
+        err2 = error_arr[length - 1]
+        err1 = error_arr[length - 2]
+        err0 = error_arr[length - 3]
+    alpha = math.log(err2/err1) / math.log(err1/err0)
+    return alpha
+        
 
 
 # Define initial value (plotted on desmos)
