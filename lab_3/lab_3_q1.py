@@ -1,4 +1,4 @@
-# Lab 3
+# Lab 3 Question 1
 # Numerical Methods
 # Evelyn Wilson
 # Due Date: October 8, 2025
@@ -22,11 +22,11 @@ def neville(x, y, x0, n):
     return q[n, n]
 
 # Define highest n value
-highest_n = 10
+highest_n = 15
 
 # Create points at which to evaluate the function
-x_points = np.linspace(-2, 2, 1000)
-
+num_points = 1000
+x_points = np.linspace(-2, 2, num_points)
 # Define an array to store the calculated points in
 results_arr = np.zeros((highest_n - 5 + 1, len(x_points)))
 
@@ -48,29 +48,15 @@ plt.title('Neville Interpolation of f(x)')
 plt.show()
 # Evaluate f(x) at the points
 y_points = f(x_points)
-
-# Compute maximum error:
-max_errors = np.max(np.abs(results_arr - y_points), axis=1)
-print("Maximum errors for evenly spaced points (n=5 to 10):", max_errors)
-# Print what n value gives the highest maximum error
-max_error_n = np.argmax(max_errors) + 5
-print(f"n value with highest maximum error: n={max_error_n}, Error={max_errors[max_error_n-5]}")
-# Print what n value gives the lowest maximum error
-min_error_n = np.argmin(max_errors) + 5
-print(f"n value with lowest maximum error: n={min_error_n}, Error={max_errors[min_error_n-5]}")
-
-# Plot error of evenly spaced points
-for n in range(5, highest_n + 1):
-    plt.plot(x_points, np.abs(results_arr[n-5,:] - y_points), label=f'n={n}')
-
-plt.yscale('log')
+plt.plot(x_points, results_arr[highest_n - 5], label='n=15')
+plt.plot(x_points, f(x_points), 'k--', label='f(x)')
 plt.legend()
-plt.title('Error of Neville Interpolation of f(x)')
+plt.title('Neville interpolation using venly spaced points of f(x)')
 plt.show()
 
 '''Repeat with Chebyshev points'''
 # Define an array to store the calculated points in
-c_results_arr = np.zeros((highest_n - 5 + 1, len(x_points)))
+ch_results_arr = np.zeros((highest_n - 5 + 1, len(x_points)))
 # Define an array to store the calculated points in
 for n in range(5, highest_n + 1):
     # Create array of Chebyshev points, scaling by 2 to get in range [-2, 2]
@@ -79,29 +65,53 @@ for n in range(5, highest_n + 1):
 
     # Call neville function for each point
     for i in range(0, len(x_points)):
-        c_results_arr[n-5, i] = neville(x_array, y_array, x_points[i], n)
+        ch_results_arr[n-5, i] = neville(x_array, y_array, x_points[i], n)
 
-    plt.plot(x_points, c_results_arr[n-5,:], label=f'n={n}')
+    plt.plot(x_points, ch_results_arr[n-5,:], label=f'n={n}')
 
 plt.plot(x_points, f(x_points), 'k--', label='f(x)')
 plt.legend()
 plt.title('Chebyshev Interpolation of f(x)')
 plt.show()
-# Compute maximum error:
-max_errors = np.max(np.abs(c_results_arr - y_points), axis=1)
-print("Maximum errors for Chebyshev points (n=5 to 10):", max_errors)
-# Print what n value gives the highest maximum error
-max_error_n = np.argmax(max_errors) + 5
-print(f"n value with highest maximum error: n={max_error_n}, Error={max_errors[max_error_n-5]}")
-# Print what n value gives the lowest maximum error
-min_error_n = np.argmin(max_errors) + 5
-print(f"n value with lowest maximum error: n={min_error_n}, Error={max_errors[min_error_n-5]}")
+
+plt.plot(x_points, ch_results_arr[highest_n - 5], label='n=15')
+plt.plot(x_points, f(x_points), 'k--', label='f(x)')
+plt.legend()
+plt.title('Chebyshev Interpolation of f(x)')
+plt.show()
 
 # Plot error of evenly spaced points
+dx = 4 / num_points
+# evenly spaced
+cumul_error_arr = np.zeros((highest_n -4))
+# chebyshev
+ch_cumul_error_arr = np.zeros((highest_n -4))
 for n in range(5, highest_n + 1):
-    plt.plot(x_points, np.abs(c_results_arr[n-5,:] - y_points), label=f'n={n}')
+    # evenly spaced
+    cumul_error = 0
+    # chebyshev
+    ch_cumul_error = 0
+    for i in range(len(x_points)):
+        # evenly spaced
+        error_slice = abs(results_arr[n-5, i] - y_points[i])
+        rectangle = error_slice*dx
+        cumul_error += rectangle
+        # chebyshev
+        ch_error_slice = abs(ch_results_arr[n-5, i] - y_points[i])
+        ch_rectangle = ch_error_slice*dx
+        ch_cumul_error += ch_rectangle
+    # evenly spaced
+    cumul_error_arr[n-5] = cumul_error
+    # chebyshev
+    ch_cumul_error_arr[n-5] = ch_cumul_error
 
-plt.yscale('log')
+n_values = np.arange(5, highest_n + 1)
+width = 0.35
+plt.bar(n_values - width/2, cumul_error_arr, width, color = 'r', label='Evenly Spaced Points')
+plt.bar(n_values + width/2, ch_cumul_error_arr, width, color = 'b', label='Chebyshev Optimal Points')
+plt.xlabel('n')
+plt.ylabel('Cumulative error')
 plt.legend()
-plt.title('Error of Neville Interpolation of f(x)')
+plt.title('Cumulative Error of Neville Interpolation of f(x)')
 plt.show()
+
