@@ -15,15 +15,6 @@ data = np.array(list(zip(x, y)))
 order = len(x) - 1
 print(order)
 
-# Define neville function
-def neville(x, y, x0, n):
-    q = np.zeros((n+1, n+1))
-    q[:,0] = y
-    for j in range(1, n+1):
-        for i in range(j, n+1):
-            q[i, j] = ((x0 - x[i-j]) * q[i, j-1] - (x0 - x[i]) * q[i-1, j-1]) / (x[i] - x[i-j])
-    return q[n, n]
-
 # Create points at which to evaluate the function
 num_points = 500
 s = np.linspace(0, 10, order + 1)
@@ -35,10 +26,7 @@ s_points = np.linspace(0, 10, num_points)
 x_results = np.zeros(len(s_points))
 y_results = np.zeros(len(s_points))
 
-# Cubic Spline Calculation
-
-
-# Call cubic spline function for each point
+# Call neville function for each point
 for i in range(0, len(s_points)):
     x_results[i] = neville(s, x, s_points[i], order)
     y_results[i] = neville(s, y, s_points[i], order)
