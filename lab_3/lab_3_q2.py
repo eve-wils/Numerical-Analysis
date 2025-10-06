@@ -26,10 +26,10 @@ def neville(x, y, x0, n):
 
 # Create points at which to evaluate the function
 num_points = 500
-s = np.linspace(0, 1000, order + 1)
+s = np.linspace(0, 10, order + 1)
 print(s)
 
-s_points = np.linspace(0, 1000, num_points)
+s_points = np.linspace(0, 10, num_points)
 
 # Define an array to store the calculated points in
 x_results = np.zeros(len(s_points))
@@ -47,6 +47,12 @@ plt.title('Interpolation of x')
 plt.show()
 plt.plot(s_points, y_results, label='y(s)')
 plt.plot(s, y, 'ko', label='y data')
+plt.legend()
+plt.title('Interpolation of y')
+plt.show()
+
+plt.plot(x_results, y_results, label='y(x)')
+plt.scatter(x, y, label = 'data points')
 plt.legend()
 plt.title('Interpolation of y')
 plt.show()
