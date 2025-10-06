@@ -4,55 +4,44 @@
 # Due Date: October 8, 2025
 
 # Imports
-import math
 import numpy as np
 from scipy import special
 import matplotlib.pyplot as plt
 
 # Define f(x)
 def f(x):
-    return math.sin(6*x)*math.cos(math.sqrt(5)*x) - (x**2)*(math.e**(-x/5))
+    return np.sin(6*x)*np.cos(np.sqrt(5)*x) - (x**2)*(np.e**(-x/5))
 
-# Create evenly spaced points along the interval and evaluate the function at those points
-j = 0
-xj = f(j)
-xrange = np.linspace(-2, 2, 1000)
+# Define neville function
+def neville(x, y, x0, n):
+    q = np.zeros((n+1, n+1))
+    q[:,0] = y
+    for j in range(1, n+1):
+        for i in range(j, n+1):
+            q[i, j] = ((x0 - x[i-j]) * q[i, j-1] - (x0 - x[i]) * q[i-1, j-1]) / (x[i] - x[i-j])
+    return q[n, n]
+
+# Define highest n value
 highest_n = 10
-results_lst = []
-error_lst = []
-l = 0
-m = 0
-for n in range(5, highest_n + 1): # Iterate through values of N to experiment with different orders of polynomials
-    nrange = np.linspace(-2.0, 2.0, n + 1) # Creates n+1 points along the interval
-    n_result = []
-    n_error = []
-    for x in xrange:
-        product = 1 # Resets the initial value for the product for every new x value to the function evaluated at x
-        sum = 0
-        for j in range(n+1):
-            for k in range(n+1): # Doing the product N times for each x value
-                if k != j:
-                    product *= ((x - nrange[k])) / (nrange[j] - nrange[k])
-            sum += f(nrange[j]) * product
-        n_result.append(sum)
-        n_error.append(abs(sum - f(x)))
-    results_lst.append(n_result)
-    error_lst.append(n_error)
 
-results_arr = np.array(results_lst)
-error_arr = np.array(error_lst)
+# Create points at which to evaluate the function
+x_points = np.linspace(-2, 2, 1000)
 
-p = highest_n - 5 + 1
-for i in range(p):
-    plt.plot(xrange, results_arr[i], label=f"N={i+5}")
+# Iterate through values of n
+for n in range(5, highest_n + 1):
+    # Define an array to store the calculated points in
+    results_arr = np.zeros(len(x_points))
 
-plt.plot(xrange, f(xrange), 'k--', label="f(x)")
+    # Create array of evenly distributed points
+    x_array = np.linspace(-2, 2, n+1)
+    print(x_array)
+    y_array = f(x_array)
+    print(y_array)
+    for i in range(0, len(x_points)):
+        results_arr[i] = neville(x_array, y_array, x_points[i], n)
 
-plt.yscale("log")
-plt.show()
-
-for i in range(p):
-    plt.plot(xrange, error_arr[i], label=f"N={i+5}")
-
-plt.yscale("log")
+    plt.plot(x_points, results_arr, label=f'n={n}')
+plt.plot(x_points, f(x_points), 'k--', label='f(x)')
+plt.legend()
+plt.title('Neville Interpolation of f(x)')
 plt.show()
