@@ -1,5 +1,5 @@
 
-# Lab 3 Question 1
+# Lab 3 Question 3
 # Numerical Methods
 # Evelyn Wilson
 # Due Date: October 8, 2025
