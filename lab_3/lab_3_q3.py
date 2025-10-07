@@ -14,7 +14,7 @@ import scipy
 x = [2.9, 2.60, 2.0, 1.5, 1.2, 1.3, 1.8, 2.5, 2.9, 2.9, 2.4, 1.8, 1.3, 1.0]
 y = [3.5, 4.05, 4.2, 3.9, 3.4, 2.8, 2.40, 2.25, 1.7, 0.9, 0.55, 0.5, 0.7, 1.2]
 data = np.array(list(zip(x, y)))
-order = len(x) - 1
+n = len(x) - 1
 
 # Create points at which to evaluate the function
 num_points = 500
@@ -27,12 +27,12 @@ x_results = np.zeros(len(s_points))
 y_results = np.zeros(len(s_points))
 
 # Cubic Spline Calculation
-def cubic_spline(a, n):
+def cubic_spline(a, n): # Where n is the order, x points, x=n+1
     matrix_A = np.zeros((n, n))
     h = np.empty((n-1))
     for j in range(n): # row
         for k in range(n): # column
-            if(j == k and (j == 0 or j == n)): # diagonal end-points
+            if(j == k and (j == 0 or j == n - 1)): # diagonal end-points
                 matrix_A[j, k] = 1
             elif(j == k): # rest of diagonal
                 matrix_A[j, k] = 2*(h[j-1]+h[j])
