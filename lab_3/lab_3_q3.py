@@ -14,12 +14,13 @@ import scipy
 x = [2.9, 2.60, 2.0, 1.5, 1.2, 1.3, 1.8, 2.5, 2.9, 2.9, 2.4, 1.8, 1.3, 1.0]
 y = [3.5, 4.05, 4.2, 3.9, 3.4, 2.8, 2.40, 2.25, 1.7, 0.9, 0.55, 0.5, 0.7, 1.2]
 data = np.array(list(zip(x, y)))
+
+# define sen(x) - 1
 n = len(x) - 1
+s = np.linspace(0, 10, len(x))
 
 # Create points at which to evaluate the function
 num_points = 500
-s = np.linspace(0, 10, n)
-
 s_points = np.linspace(0, 10, num_points)
 
 # Define an array to store the calculated points in
@@ -27,28 +28,37 @@ x_results = np.zeros(len(s_points))
 y_results = np.zeros(len(s_points))
 
 # Cubic Spline Calculation
-def cubic_spline(a, n): # Where n is the order, x points, x=n+1
-    matrix_A = np.zeros((n, n))
-    h = np.empty((n-1))
-    for j in range(n): # row
-        for k in range(n): # column
-            if(j == k and (j == 0 or j == n - 1)): # diagonal end-points
-                matrix_A[j, k] = 1
-            elif(j == k): # rest of diagonal
-                matrix_A[j, k] = 2*(h[j-1]+h[j])
-            elif(k == j - 1):
-                matrix_A[j, k] = h[k]
-            elif(k == j + 1):
-                matrix_A[j, k] = h[j]
+def cubic_spline(a, s):
+    N = len(a) - 1
+    h = np.diff(s)
+    A = np.zeros((N+1, N+1))
+    b = np.zeros(N+1)
 
-    b = np.zeros(n)
-    for i in range(1, n-1):
-        b = (3 / h[i])*(a[i+1] - a[i]) - (3 / h[i-1])*(a[i]-a[i-1])
+    # Define corner values of A
+    A[0,0] = 1
+    A[N, N] = 1
 
-    c = scipy.linalg.solve(matrix_A, b)
-    print(c)
+    for i in range(1, N):
+            A[i, i-1] = h[i-1]
+            A[i, i] = 2 * (h[i-1] + h[i])
+            A[i, i+1] = h[i]
+            b[i] = (3/h[i])*(a[i+1] - a[i]) - (3/h[i-1])*(a[i] - a[i-1])
+    c = scipy.linalg.solve(A, b)
+    return c, h
 
-cubic_spline(x, n)
+cx, hx = cubic_spline(x, s)
+cy, hy = cubic_spline(y, s)
+
+def compute_remaining(a, c, h):
+    N = len(h)
+    b = np.zeros(N)
+    d = np.zeros(N)
+    for i in range(N):
+        b[i] = (a[i+1] - a[i])/h[i] - h[i]*(2*c[i] + c[i+1])/3
+        d[i] = (c[i+1] - c[i]) / (3*h[i])
+    return b, d
+
+
 '''
 # Call cubic spline function for each point
 for i in range(0, len(s_points)):
