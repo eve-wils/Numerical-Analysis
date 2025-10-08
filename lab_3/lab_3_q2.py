@@ -25,9 +25,9 @@ def neville(x, y, x0, n):
     return q[n, n]
 
 # Create points at which to evaluate the function
-s = np.linspace(0, 1, order + 1)
+s = np.linspace(0, 10, order + 1)
 
-s_points = np.linspace(0, 1, 1000)
+s_points = np.linspace(0, 10, 1000)
 
 # Define an array to store the calculated points in
 x_results = np.zeros(len(s_points))

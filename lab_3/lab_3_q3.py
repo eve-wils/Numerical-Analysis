@@ -16,7 +16,7 @@ x = [2.9, 2.60, 2.0, 1.5, 1.2, 1.3, 1.8, 2.5, 2.9, 2.9, 2.4, 1.8, 1.3, 1.0]
 y = [3.5, 4.05, 4.2, 3.9, 3.4, 2.8, 2.40, 2.25, 1.7, 0.9, 0.55, 0.5, 0.7, 1.2]
 data = np.array(list(zip(x, y)))
 
-# define sen(x) - 1
+# Define needed values
 n = len(x) - 1
 s = np.linspace(0, 10, len(x))
 
@@ -56,25 +56,6 @@ def compute_remaining(a, c, h):
         d[i] = (c[i+1] - c[i]) / (3*h[i])
     return b, d
 
-def spline_to_latex(label, a, b, c, d, precision=5):
-    """
-    Print LaTeX table for cubic spline coefficients.
-    a, b, c, d: arrays of coefficients per interval
-    label: name of the variable, e.g., 'x' or 'y'
-    """
-    n = len(b)
-    data = {
-        "$j$": np.arange(n),
-        "$a_j$": np.round(a[:n], precision),
-        "$b_j$": np.round(b, precision),
-        "$c_j$": np.round(c[:n], precision),
-        "$d_j$": np.round(d, precision)
-    }
-    df = pd.DataFrame(data)
-    print(f"\nLaTeX table for {label}(s):\n")
-    print(df.to_latex(index=False, escape=False))
-    return None
-
 def evaluate_spline(a, b, c, d, s_nodes, s_eval): # where s_eval is the range of points to evaluate at
     vals = []
     for sp in s_eval:
@@ -92,17 +73,13 @@ def evaluate_spline(a, b, c, d, s_nodes, s_eval): # where s_eval is the range of
             vals.append(val)
     return np.array(vals)
 
-# function calls
+# Function calls
 cx, hx = cubic_spline(x, s)
 cy, hy = cubic_spline(y, s)
 bx, dx = compute_remaining(x, cx, hx)
 by, dy = compute_remaining(y, cy, hy)
 
-# print the table in LaTeX
-spline_to_latex("x", x, bx, cx, dx)
-spline_to_latex("y", y, by, cy, dy)
-
-# evaluate the spline and plot it
+# Evaluate the spline and plot it
 x_pts = evaluate_spline(x, bx, cx, dx, s, s_points)
 y_pts = evaluate_spline(y, by, cy, dy, s, s_points)
 
