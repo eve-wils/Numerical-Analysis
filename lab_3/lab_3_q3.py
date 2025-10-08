@@ -9,6 +9,7 @@ import numpy as np
 from scipy import special
 import matplotlib.pyplot as plt
 import scipy
+import pandas as pd
 
 # Import data
 x = [2.9, 2.60, 2.0, 1.5, 1.2, 1.3, 1.8, 2.5, 2.9, 2.9, 2.4, 1.8, 1.3, 1.0]
@@ -46,9 +47,6 @@ def cubic_spline(a, s):
     c = scipy.linalg.solve(A, b)
     return c, h
 
-cx, hx = cubic_spline(x, s)
-cy, hy = cubic_spline(y, s)
-
 def compute_remaining(a, c, h):
     N = len(h)
     b = np.zeros(N)
@@ -58,27 +56,70 @@ def compute_remaining(a, c, h):
         d[i] = (c[i+1] - c[i]) / (3*h[i])
     return b, d
 
+def spline_to_latex(label, a, b, c, d, precision=5):
+    """
+    Print LaTeX table for cubic spline coefficients.
+    a, b, c, d: arrays of coefficients per interval
+    label: name of the variable, e.g., 'x' or 'y'
+    """
+    n = len(b)
+    data = {
+        "$j$": np.arange(n),
+        "$a_j$": np.round(a[:n], precision),
+        "$b_j$": np.round(b, precision),
+        "$c_j$": np.round(c[:n], precision),
+        "$d_j$": np.round(d, precision)
+    }
+    df = pd.DataFrame(data)
+    print(f"\nLaTeX table for {label}(s):\n")
+    print(df.to_latex(index=False, escape=False))
+    return None
 
-'''
-# Call cubic spline function for each point
-for i in range(0, len(s_points)):
-    # x_results[i] = neville(s, x, s_points[i], order)
-    # y_results[i] = neville(s, y, s_points[i], order)
+def evaluate_spline(a, b, c, d, s_nodes, s_eval):
+    vals = []
+    for sp in s_eval:
+        # find which interval sp lies in
+        for j in range(len(s_nodes) - 1):
+            if s_nodes[j] <= sp <= s_nodes[j+1]:
+                ds = sp - s_nodes[j]
+                val = a[j] + b[j]*ds + c[j]*ds**2 + d[j]*ds**3
+                vals.append(val)
+                break
+        else:
+            # if sp is beyond last node, use last interval
+            ds = sp - s_nodes[-2]
+            val = a[-2] + b[-2]*ds + c[-2]*ds**2 + d[-2]*ds**3
+            vals.append(val)
+    return np.array(vals)
 
-plt.plot(s_points, x_results, label='x(s)')
+# function calls
+cx, hx = cubic_spline(x, s)
+cy, hy = cubic_spline(y, s)
+bx, dx = compute_remaining(x, cx, hx)
+by, dy = compute_remaining(y, cy, hy)
+
+# print the table in LaTeX
+spline_to_latex("x", x, bx, cx, dx)
+spline_to_latex("y", y, by, cy, dy)
+
+# evaluate the spline and plot it
+x_pts = evaluate_spline(x, bx, cx, dx, s, s_points)
+y_pts = evaluate_spline(y, by, cy, dy, s, s_points)
+
+plt.plot(s_points, x_pts, label='x(s)')
 plt.plot(s, x, 'ko', label='x data')
 plt.legend()
 plt.title('Interpolation of x')
 plt.show()
-plt.plot(s_points, y_results, label='y(s)')
+
+plt.plot(s_points, y_pts, label='y(s)')
 plt.plot(s, y, 'ko', label='y data')
 plt.legend()
 plt.title('Interpolation of y')
 plt.show()
 
-plt.plot(x_results, y_results, label='y(x)')
+plt.plot(x_pts, y_pts, label='y(x)')
 plt.scatter(x, y, label = 'data points')
 plt.legend()
-plt.title('Interpolation of y')
+plt.title('Interpolation of y(x)')
 plt.show()
-'''
