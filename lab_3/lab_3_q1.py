@@ -42,16 +42,18 @@ for n in range(5, highest_n + 1):
 
     plt.plot(x_points, results_arr[n-5,:], label=f'n={n}')
 
+# Evaluate f(x) at the points
 plt.plot(x_points, f(x_points), 'k--', label='f(x)')
 plt.legend()
-plt.title('Neville Interpolation of f(x)')
+plt.title('Neville Interpolation with uniformly spaced points n=5 to n=15')
 plt.show()
-# Evaluate f(x) at the points
+
+
 y_points = f(x_points)
 plt.plot(x_points, results_arr[highest_n - 5], label='n=15')
 plt.plot(x_points, f(x_points), 'k--', label='f(x)')
 plt.legend()
-plt.title('Neville interpolation using venly spaced points of f(x)')
+plt.title('Neville interpolation with uniformly spaced points n=15')
 plt.show()
 
 '''Repeat with Chebyshev points'''

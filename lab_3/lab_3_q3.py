@@ -75,7 +75,7 @@ def spline_to_latex(label, a, b, c, d, precision=5):
     print(df.to_latex(index=False, escape=False))
     return None
 
-def evaluate_spline(a, b, c, d, s_nodes, s_eval):
+def evaluate_spline(a, b, c, d, s_nodes, s_eval): # where s_eval is the range of points to evaluate at
     vals = []
     for sp in s_eval:
         # find which interval sp lies in
