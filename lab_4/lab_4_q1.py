@@ -56,6 +56,23 @@ print(f"y = {a0_cubic:.4e} + {a1_cubic:.4e}*x + {a2_cubic:.4e}*x^2 + {a3_cubic:.
 # Fitted values
 y_cubic_fit = a0_cubic + a1_cubic*x_data + a2_cubic*x_data**2 + a3_cubic*x_data**3
 
+# Print the normal equations
+print("\nNormal Equations for Cubic Fit:")
+print("(A^T * A) * c = A^T * y")
+print("\nMatrix A^T * A:")
+print(ATA_cubic)
+print("\nVector A^T * y:")
+print(ATy_cubic)
+print("\nExpanded form:")
+for i in range(4):
+    equation = ""
+    for j in range(4):
+        equation += f"({ATA_cubic[i,j]:.4e})*a{j}"
+        if j < 3:
+            equation += " + "
+    equation += f" = {ATy_cubic[i]:.4e}"
+    print(equation)
+
 ### LINEARIZED FIT ###
 
 # Take natural log of data
@@ -77,42 +94,26 @@ ATy_linearized = A_linearized.T @ ln_y_data
 linearized_coeffs = np.linalg.solve(ATA_linearized, ATy_linearized)
 ln_A, B = linearized_coeffs
 A_exp = np.exp(ln_A)  # Undo natural log
-
-print(f"Assumed model: y = A * exp(B*x)")
-print(f"After linearization: ln(y) = ln(A) + B*x")
+print("Linearized Linear Polynomial Fit:")
 print(f"\nResults: A = {A_exp:.4e}, B = {B:.4e}")
 print(f"Therefore: y = {A_exp:.4e} * exp({B:.4e}*x)")
 
 # Create linearized fit
 y_linearized_fit = A_exp * np.exp(B * x_data)
 
-# ============================================================================
-# METHOD 4: MANUAL NON-LINEAR LEAST SQUARES FIT (Direct exponential fit)
-# ============================================================================
-print("\n" + "=" * 70)
-print("METHOD 4: MANUAL NON-LINEAR LEAST SQUARES FIT")
-print("=" * 70)
-
-# For non-linear fit, we use Gauss-Newton method to minimize:
-# sum((y_i - A*exp(B*x_i))^2)
+### NON-LINEAR LEAST SQUARES ###
 
 # Define the exponential model
 def exponential_model(x, A, B):
-    """Exponential decay model: y = A * exp(B*x)"""
     return A * np.exp(B * x)
 
 # Define the residual function
 def residuals(params, x, y):
-    """Calculate residuals: y_data - y_model"""
     A, B = params
     return y - exponential_model(x, A, B)
 
-# Define the Jacobian matrix for the exponential model
+# Jacobian matrix for the exponential model
 def jacobian(params, x):
-    """
-    Jacobian matrix of the exponential model
-    Partial derivatives: df/dA = exp(B*x), df/dB = A*x*exp(B*x)
-    """
     A, B = params
     J = np.zeros((len(x), 2))
     exp_term = np.exp(B * x)
@@ -120,8 +121,6 @@ def jacobian(params, x):
     J[:, 1] = A * x * exp_term   # df/dB
     return J
 
-# Gauss-Newton algorithm
-# Start with linearized solution as initial guess
 params = np.array([A_exp, B])
 
 max_iterations = 100
@@ -134,12 +133,12 @@ for iteration in range(max_iterations):
     # Calculate Jacobian
     J = jacobian(params, x_data)
     
-    # Gauss-Newton update: (J^T * J) * delta = J^T * r
-    JTJ = J.T @ J
-    JTr = J.T @ r
+    # (J^T * J) * delta = J^T * r
+    JacobT_J = J.T @ J
+    JacobT_r = J.T @ r
     
     # Solve for parameter update
-    delta = np.linalg.solve(JTJ, JTr)
+    delta = np.linalg.solve(JacobT_J, JacobT_r)
     
     # Update parameters
     params = params + delta
@@ -157,17 +156,6 @@ print(f"  Converged in {iteration + 1} iterations")
 # Generate fitted values
 y_nonlinear_fit = exponential_model(x_data, A_nonlinear, B_nonlinear)
 
-# ============================================================================
-# COMPARISON: Linearized vs Non-linear Fit
-# ============================================================================
-print("\n" + "=" * 70)
-print("COMPARISON: Linearized vs Non-linear Exponential Fit")
-print("=" * 70)
-
-print(f"\nParameter comparison:")
-print(f"  Linearized:  A = {A_exp:.4e}, B = {B:.4e}")
-print(f"  Non-linear:  A = {A_nonlinear:.4e}, B = {B_nonlinear:.4e}")
-
 # Calculate residuals (errors) for each method
 residuals_linearized = y_data - y_linearized_fit
 residuals_nonlinear = y_data - y_nonlinear_fit
@@ -180,13 +168,9 @@ print(f"\nSum of Squared Errors:")
 print(f"  Linearized: {SSE_linearized:.4e}")
 print(f"  Non-linear: {SSE_nonlinear:.4e}")
 
-# ============================================================================
-# PLOTTING: Linear and Semilog Scales
-# ============================================================================
-plt.figure(figsize=(14, 10))
+### PLOTTING ###
 
 # Plot 1: All fits on linear scale
-plt.subplot(2, 2, 1)
 plt.plot(x_data, y_data, 'ko', markersize=8, label='Experimental Data', zorder=5)
 plt.plot(x_data, y_linear_fit, 'b-', linewidth=2, label='Linear Fit')
 plt.plot(x_data, y_cubic_fit, 'r-', linewidth=2, label='Cubic Fit')
@@ -197,9 +181,9 @@ plt.ylabel('y', fontsize=12)
 plt.title('All Fits - Linear Scale', fontsize=14, fontweight='bold')
 plt.legend(fontsize=10)
 plt.grid(True, alpha=0.3)
+plt.show()
 
 # Plot 2: Exponential fits comparison on linear scale
-plt.subplot(2, 2, 2)
 plt.plot(x_data, y_data, 'ko', markersize=8, label='Experimental Data', zorder=5)
 plt.plot(x_data, y_linearized_fit, 'g--', linewidth=2, label='Linearized Exp Fit')
 plt.plot(x_data, y_nonlinear_fit, 'm:', linewidth=3, label='Non-linear Exp Fit')
@@ -208,9 +192,9 @@ plt.ylabel('y', fontsize=12)
 plt.title('Exponential Fits - Linear Scale', fontsize=14, fontweight='bold')
 plt.legend(fontsize=10)
 plt.grid(True, alpha=0.3)
+plt.show()
 
 # Plot 3: All fits on semilog scale
-plt.subplot(2, 2, 3)
 plt.semilogy(x_data, y_data, 'ko', markersize=8, label='Experimental Data', zorder=5)
 plt.semilogy(x_data, y_linear_fit, 'b-', linewidth=2, label='Linear Fit')
 plt.semilogy(x_data, y_cubic_fit, 'r-', linewidth=2, label='Cubic Fit')
@@ -221,9 +205,9 @@ plt.ylabel('y (log scale)', fontsize=12)
 plt.title('All Fits - Semilog Scale', fontsize=14, fontweight='bold')
 plt.legend(fontsize=10)
 plt.grid(True, alpha=0.3, which='both')
+plt.show()
 
 # Plot 4: Residuals comparison on log scale
-plt.subplot(2, 2, 4)
 plt.semilogy(x_data, np.abs(residuals_linearized), 'go-', linewidth=2, 
              markersize=6, label='Linearized Fit')
 plt.semilogy(x_data, np.abs(residuals_nonlinear), 'mo-', linewidth=2, 
@@ -237,21 +221,3 @@ plt.grid(True, alpha=0.3, which='both')
 plt.tight_layout()
 plt.savefig('lab4_q1_analysis.png', dpi=300, bbox_inches='tight')
 plt.show()
-
-# ============================================================================
-# ANSWER TO ADVISOR'S QUESTION
-# ============================================================================
-print("\n" + "=" * 70)
-print("ANSWER TO ADVISOR'S QUESTION")
-print("=" * 70)
-print("\nWhy didn't we initially do a non-linear least-squares fit?")
-print("-" * 70)
-print("The linearized approach is simpler and provides good initial estimates.")
-print("\nDo they give the same answer?")
-print("-" * 70)
-print("The methods give slightly different results because:")
-print("  - Linearized fit minimizes error in ln(y) space")
-print("  - Non-linear fit minimizes error in y space")
-print(f"\nIn this case, non-linear SSE ({SSE_nonlinear:.4e}) is")
-print(f"{'smaller' if SSE_nonlinear < SSE_linearized else 'larger'} than linearized SSE ({SSE_linearized:.4e})")
-print("The non-linear fit is more accurate for the original data.")
