@@ -4,14 +4,13 @@
 # Due Date: October 8, 2025
 
 # Imports
-import math
 import numpy as np
 from scipy import special
 import matplotlib.pyplot as plt
 
 # Define f(x)
 def f(x):
-    return math.sin(6*x)*math.cos(math.sqrt(5)*x) - (x**2)*(math.e**(-x/5))
+    return np.sin(6*x)*np.cos(np.sqrt(5)*x) - (x**2)*(np.e**(-x/5))
 
 # Create evenly spaced points along the interval and evaluate the function at those points
 j = 0
