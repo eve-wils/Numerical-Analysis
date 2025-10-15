@@ -1,7 +1,6 @@
 # Lab 4 Question 2
 # Evelyn Wilson
 # October 15, 2025
-
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -15,9 +14,9 @@ r4 = 1.94
 # Results storage
 results = []
 
-# Set initial guesses for each input angle
+# Set initial guesses ONCE - will be carried over
 theta2 = math.radians(45)
-theta3 = math.radians(360)
+theta3 = math.radians(180)
 
 def f1(th2, th3):
     return (r2 * np.cos(th2)) + (r3*np.cos(th3)) - (r4*np.cos(theta)) - r1
@@ -70,53 +69,51 @@ centered_diff = []
 
 # Forward difference
 for i in range(len(x_angles) - 1):
-    forward_diff.append((phi[i+1] - phi[i]) / 1)  # 1 degree step
+    forward_diff.append((phi[i+1] - phi[i]) / 1)
 
 # Centered difference
 for i in range(1, len(x_angles) - 1):
-    centered_diff.append((phi[i+1] - phi[i-1]) / 2)  # 2 degree step
+    centered_diff.append((phi[i+1] - phi[i-1]) / 2)
 
-# Plot 1: θ2 vs θ
+# Plot 1: φ vs θ
+plt.figure()
 plt.plot(x_angles, phi)
-plt.title('θ2 vs Input Angle')
-plt.xlabel('Input Angle (degrees)')
-plt.ylabel('θ2 (degrees)')
-
-# Plot 2: Forward Difference
-plt.plot(x_angles[:-1], forward_diff, label='Forward Difference')
-plt.title('Forward Difference of θ2')
-plt.xlabel('Input Angle (degrees)')
-plt.ylabel('dθ2/dθ (Forward)')
-
-# Plot 3: Centered Difference
-plt.plot(x_angles[1:-1], centered_diff, label='Centered Difference')
-plt.title('Centered Difference of θ2')
-plt.xlabel('Input Angle (degrees)')
-plt.ylabel('dθ2/dθ (Centered)')
+plt.title('φ vs θ')
+plt.xlabel('θ (degrees)')
+plt.ylabel('φ (degrees)')
+plt.grid(True)
 plt.show()
 
-# Plot 4: Difference between Forward and Centered
-# Align the differences for plotting
+# Plot 2: Forward and Centered Difference
+plt.figure()
+plt.plot(x_angles[1:-1], centered_diff, label='Centered Difference')
+plt.plot(x_angles[:-1], forward_diff, label='Forward Difference', linestyle='dashed')
+plt.title('dφ/dθ')
+plt.xlabel('θ (degrees)')
+plt.ylabel('dφ/dθ')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Plot 3: Difference between Forward and Centered
 diff_plot = []
-for i in range(1, len(x_angles) - 1):
-    diff_plot.append(abs(forward_diff[i] - centered_diff[i-1]))
+for i in range(len(centered_diff)):
+    diff_plot.append(abs(forward_diff[i+1] - centered_diff[i]))
 
+plt.figure()
 plt.semilogy(x_angles[1:-1], diff_plot)
-plt.title('Difference between Forward and Centered')
-plt.xlabel('Input Angle (degrees)')
+plt.title('|Forward - Centered|')
+plt.xlabel('θ (degrees)')
 plt.ylabel('|Forward - Centered| (log scale)')
-
-plt.tight_layout()
+plt.grid(True)
 plt.show()
 
 ######## PART II ########
 
 # Compute alpha based on phi
-alpha = []
-for x in phi:
-    alpha.append(x + 149)
-# Do Newton's Method to get Beta
-# Link lengths
+alpha = [x + 149 for x in phi]
+
+# Link lengths for second linkage
 r1 = 1.23
 r2 = 1.26
 r3 = 1.82
@@ -125,15 +122,14 @@ r4 = 2.35
 # Results storage
 results = []
 
-  
-# Reset initial guesses for each input angle
+# Set initial guesses ONCE - will be carried over
 theta2 = math.radians(45)
-theta3 = math.radians(360)
+theta3 = math.radians(180)
 
 # Iterate over input angles
 for input_angle in alpha:
     theta = math.radians(input_angle)
-  
+    
     # Newton's method
     for _ in range(100):
         F = np.array([f1(theta2, theta3), f2(theta2, theta3)])
@@ -150,44 +146,45 @@ for input_angle in alpha:
         
         if np.linalg.norm(delta) < 1e-10:
             break
-     ### Question: Should beta be plotted in radians or degrees? I think degrees
+    
     results.append((input_angle, theta2, theta3))
 
-# Separate x, y values for easier plotting
-x_angles = [r[0] for r in results]
+# Separate values
 beta = [r[1] for r in results]
 
-### Find dBeta/dt ###
+### Find dβ/dθ ###
 b_forward_diff = []
 b_centered_diff = []
 
+dtheta_rad = math.radians(1)
+
 # Forward difference
-for i in range(len(x_angles) - 1):
-    b_forward_diff.append((beta[i+1] - beta[i]) / math.radians(1))  # 1 degree step
+for i in range(len(beta) - 1):
+    b_forward_diff.append((beta[i+1] - beta[i]) / dtheta_rad)
 
 # Centered difference
-for i in range(1, len(x_angles) - 1):
-    b_centered_diff.append((beta[i+1] - beta[i-1]) / math.radians(2))  # 2 degree step
+for i in range(1, len(beta) - 1):
+    b_centered_diff.append((beta[i+1] - beta[i-1]) / (2 * dtheta_rad))
 
-omega = 550 # radians per minute
-omega /= 60 # radians per second
+omega = 550 / 60  # rad/s
+
 db_dt_forward = [omega * diff for diff in b_forward_diff]
 db_dt_centered = [omega * diff for diff in b_centered_diff]
 
-### Find dBeta^2/dt^2 ###
+### Find d²β/dθ² ###
 b2_forward_diff = []
 b2_centered_diff = []
 
-# forward difference
-for i in range(len(x_angles) - 2):
-    b2_forward_diff.append(beta[i+2] - 2*(beta[i+1] + beta[i]) / (math.radians(1) ** 2))  # 1 degree step
+# Forward difference
+for i in range(len(beta) - 2):
+    b2_forward_diff.append((beta[i+2] - 2*beta[i+1] + beta[i]) / (dtheta_rad ** 2))
 
-# centered difference
-for i in range(1, len(x_angles) - 1):
-    b_centered_diff.append((beta[i+1] -2* beta[i] + beta[i-1]) / (math.radians(2)**2))  # 2 degree step
+# Centered difference
+for i in range(1, len(beta) - 1):
+    b2_centered_diff.append((beta[i+1] - 2*beta[i] + beta[i-1]) / (dtheta_rad**2))
 
-db2_dt2_forward = [(omega ** 2) * diff for diff in b_forward_diff]
-db2_dt2_centered = [(omega ** 2)* diff for diff in b_centered_diff]
+db2_dt2_forward = [(omega ** 2) * diff for diff in b2_forward_diff]
+db2_dt2_centered = [(omega ** 2) * diff for diff in b2_centered_diff]
 
 # Figure 4: β vs θ
 plt.figure()
@@ -200,8 +197,8 @@ plt.show()
 
 # Figure 5: dβ/dt (both methods)
 plt.figure()
-plt.plot(x_angles[:-1], db_dt_forward, label='Forward')
 plt.plot(x_angles[1:-1], db_dt_centered, label='Centered')
+plt.plot(x_angles[:-1], db_dt_forward, label='Forward', linestyle='dashed')
 plt.title('dβ/dt (Angular Velocity)')
 plt.xlabel('θ (degrees)')
 plt.ylabel('dβ/dt (rad/s)')
@@ -211,8 +208,8 @@ plt.show()
 
 # Figure 6: d²β/dt² (both methods)
 plt.figure()
-plt.plot(x_angles[:-2], db2_dt2_forward, label='Forward')
 plt.plot(x_angles[1:-1], db2_dt2_centered, label='Centered')
+plt.plot(x_angles[:-2], db2_dt2_forward, label='Forward', linestyle='dashed')
 plt.title('d²β/dt² (Angular Acceleration)')
 plt.xlabel('θ (degrees)')
 plt.ylabel('d²β/dt² (rad/s²)')
@@ -235,11 +232,11 @@ plt.show()
 
 # Figure 8: Difference for d²β/dt²
 diff_acc = []
-for i in range(len(db2_dt2_centered)):
+for i in range(len(db2_dt2_centered) - 1):  # Changed from len(db2_dt2_centered)
     diff_acc.append(abs(db2_dt2_forward[i+1] - db2_dt2_centered[i]))
 
 plt.figure()
-plt.semilogy(x_angles[1:-1], diff_acc)
+plt.semilogy(x_angles[2:-1], diff_acc)  # Changed from x_angles[1:-1]
 plt.title('|Forward - Centered| for d²β/dt²')
 plt.xlabel('θ (degrees)')
 plt.ylabel('Difference (rad/s², log scale)')
