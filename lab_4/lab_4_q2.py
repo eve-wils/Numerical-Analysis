@@ -15,31 +15,31 @@ r4 = 1.94
 # Results storage
 results = []
 
+# Set initial guesses for each input angle
+theta2 = math.radians(45)
+theta3 = math.radians(360)
+
+def f1(th2, th3):
+    return (r2 * np.cos(th2)) + (r3*np.cos(th3)) - (r4*np.cos(theta)) - r1
+
+def f2(th2, th3):
+    return (r2 * np.sin(th2)) + (r3*np.sin(th3)) - (r4*np.sin(theta))
+
+def df1_dth2(th2, th3):
+    return -r2 * np.sin(th2)
+
+def df1_dth3(th2, th3):
+    return -r3 * np.sin(th3)
+
+def df2_dth2(th2, th3):
+    return r2 * np.cos(th2)
+
+def df2_dth3(th2, th3):
+    return r3 * np.cos(th3)
+
 # Iterate over input angles
 for input_angle in range(0, 361):
     theta = math.radians(input_angle)
-    
-    # Reset initial guesses for each input angle
-    theta2 = math.radians(45)
-    theta3 = math.radians(360)
-
-    def f1(th2, th3):
-        return (r2 * np.cos(th2)) + (r3*np.cos(th3)) - (r4*np.cos(theta)) - r1
-    
-    def f2(th2, th3):
-        return (r2 * np.sin(th2)) + (r3*np.sin(th3)) - (r4*np.sin(theta))
-    
-    def df1_dth2(th2, th3):
-        return -r2 * np.sin(th2)
-    
-    def df1_dth3(th2, th3):
-        return -r3 * np.sin(th3)
-    
-    def df2_dth2(th2, th3):
-        return r2 * np.cos(th2)
-    
-    def df2_dth3(th2, th3):
-        return r3 * np.cos(th3)
     
     # Newton's method
     for _ in range(100):
@@ -125,32 +125,15 @@ r4 = 2.35
 # Results storage
 results = []
 
-# Iterate over input angles
-for input_angle in range(0, 361):
-    theta = math.radians(input_angle)
-    
-    # Reset initial guesses for each input angle
-    theta2 = math.radians(45)
-    theta3 = math.radians(360)
+  
+# Reset initial guesses for each input angle
+theta2 = math.radians(45)
+theta3 = math.radians(360)
 
-    def f1(th2, th3):
-        return (r2 * np.cos(th2)) + (r3*np.cos(th3)) - (r4*np.cos(theta)) - r1
-    
-    def f2(th2, th3):
-        return (r2 * np.sin(th2)) + (r3*np.sin(th3)) - (r4*np.sin(theta))
-    
-    def df1_dth2(th2, th3):
-        return -r2 * np.sin(th2)
-    
-    def df1_dth3(th2, th3):
-        return -r3 * np.sin(th3)
-    
-    def df2_dth2(th2, th3):
-        return r2 * np.cos(th2)
-    
-    def df2_dth3(th2, th3):
-        return r3 * np.cos(th3)
-    
+# Iterate over input angles
+for input_angle in alpha:
+    theta = math.radians(input_angle)
+  
     # Newton's method
     for _ in range(100):
         F = np.array([f1(theta2, theta3), f2(theta2, theta3)])
@@ -167,12 +150,98 @@ for input_angle in range(0, 361):
         
         if np.linalg.norm(delta) < 1e-10:
             break
-    
-    results.append((input_angle, math.degrees(theta2), math.degrees(theta3)))
+     ### Question: Should beta be plotted in radians or degrees? I think degrees
+    results.append((input_angle, theta2, theta3))
 
 # Separate x, y values for easier plotting
 x_angles = [r[0] for r in results]
 beta = [r[1] for r in results]
-# Find dBeta/dt
 
-# Find dBeta^2/dt^2
+### Find dBeta/dt ###
+b_forward_diff = []
+b_centered_diff = []
+
+# Forward difference
+for i in range(len(x_angles) - 1):
+    b_forward_diff.append((beta[i+1] - beta[i]) / math.radians(1))  # 1 degree step
+
+# Centered difference
+for i in range(1, len(x_angles) - 1):
+    b_centered_diff.append((beta[i+1] - beta[i-1]) / math.radians(2))  # 2 degree step
+
+omega = 550 # radians per minute
+omega /= 60 # radians per second
+db_dt_forward = [omega * diff for diff in b_forward_diff]
+db_dt_centered = [omega * diff for diff in b_centered_diff]
+
+### Find dBeta^2/dt^2 ###
+b2_forward_diff = []
+b2_centered_diff = []
+
+# forward difference
+for i in range(len(x_angles) - 2):
+    b2_forward_diff.append(beta[i+2] - 2*(beta[i+1] + beta[i]) / (math.radians(1) ** 2))  # 1 degree step
+
+# centered difference
+for i in range(1, len(x_angles) - 1):
+    b_centered_diff.append((beta[i+1] -2* beta[i] + beta[i-1]) / (math.radians(2)**2))  # 2 degree step
+
+db2_dt2_forward = [(omega ** 2) * diff for diff in b_forward_diff]
+db2_dt2_centered = [(omega ** 2)* diff for diff in b_centered_diff]
+
+# Figure 4: β vs θ
+plt.figure()
+plt.plot(x_angles, np.degrees(beta))
+plt.title('β vs θ')
+plt.xlabel('θ (degrees)')
+plt.ylabel('β (degrees)')
+plt.grid(True)
+plt.show()
+
+# Figure 5: dβ/dt (both methods)
+plt.figure()
+plt.plot(x_angles[:-1], db_dt_forward, label='Forward')
+plt.plot(x_angles[1:-1], db_dt_centered, label='Centered')
+plt.title('dβ/dt (Angular Velocity)')
+plt.xlabel('θ (degrees)')
+plt.ylabel('dβ/dt (rad/s)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Figure 6: d²β/dt² (both methods)
+plt.figure()
+plt.plot(x_angles[:-2], db2_dt2_forward, label='Forward')
+plt.plot(x_angles[1:-1], db2_dt2_centered, label='Centered')
+plt.title('d²β/dt² (Angular Acceleration)')
+plt.xlabel('θ (degrees)')
+plt.ylabel('d²β/dt² (rad/s²)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Figure 7: Difference for dβ/dt
+diff_vel = []
+for i in range(len(db_dt_centered)):
+    diff_vel.append(abs(db_dt_forward[i+1] - db_dt_centered[i]))
+
+plt.figure()
+plt.semilogy(x_angles[1:-1], diff_vel)
+plt.title('|Forward - Centered| for dβ/dt')
+plt.xlabel('θ (degrees)')
+plt.ylabel('Difference (rad/s, log scale)')
+plt.grid(True)
+plt.show()
+
+# Figure 8: Difference for d²β/dt²
+diff_acc = []
+for i in range(len(db2_dt2_centered)):
+    diff_acc.append(abs(db2_dt2_forward[i+1] - db2_dt2_centered[i]))
+
+plt.figure()
+plt.semilogy(x_angles[1:-1], diff_acc)
+plt.title('|Forward - Centered| for d²β/dt²')
+plt.xlabel('θ (degrees)')
+plt.ylabel('Difference (rad/s², log scale)')
+plt.grid(True)
+plt.show()
