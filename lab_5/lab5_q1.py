@@ -25,7 +25,7 @@ def trap(function, a, b, n):
 # Romberg integration
 def romberg(function, a, b):
     tolerance = 1e-9
-    max = 10
+    max = 100
     romberg = np.zeros((max, max))
     for i in range(max):
         n = 2**i
@@ -33,16 +33,22 @@ def romberg(function, a, b):
         for j in range(1, i+1):  # Changed to i+1 to include current level
             romberg[i, j] = (4**j * romberg[i, j-1] - romberg[i-1, j-1]) / (4**j - 1)
         if i > 0 and abs(romberg[i, i] - romberg[i-1, i-1]) <= tolerance:  # Added i > 0 check
-            print(f"Converged on the {i}th iteration.")
             return i, romberg[i, i]
     return None
 
-print(romberg("f", 0, 1))
-print(romberg("g", 0, 1))
-print(romberg("f", 1, 2))
-print(romberg("g", 1, 2))
-n = 3
-print(trap("f", 0, 1, n))
-print(trap("g", 0, 1, n))
-print(trap("f", 1, 2, n))
-print(trap("g", 1, 2, n))
+nf1, answerf1 = romberg("f", 0, 1)
+nf2, answerf2 = romberg("f", 1, 2)
+
+trapf1 = trap("f", 0, 1, nf1)
+trapf2 = trap("f", 1, 2, nf2)
+print(f"PART A: 0 -> 1; Romberg answer: {answerf1}, Iterations: {nf1}, Trap answer: {trapf1}, Difference = {abs(trapf1 - answerf1)}")
+print(f"PART A: 1 -> 2; Romberg answer: {answerf2}, Iterations: {nf2}, Trap answer: {trapf2}, Difference = {abs(trapf2 - answerf2)}")
+
+# PART B calculations
+ng1, answerg1 = romberg("g", 0, 1)
+ng2, answerg2 = romberg("g", 1, 2)
+
+trapg1 = trap("g", 0, 1, ng1)
+trapg2 = trap("g", 1, 2, ng2)
+print(f"PART B:  0 -> 1; Romberg answer: {answerg1}, Iterations: {ng1}, Trap answer: {trapg1}, Difference = {abs(trapg1 - answerg1)}")
+print(f"PART B:  1 -> 2; Romberg answer: {answerg2}, Iterations: {ng2}, Trap answer: {trapg2}, Difference = {abs(trapg2 - answerg2)}")
