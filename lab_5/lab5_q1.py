@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 def f(x):
-    return x**2 * math.e**(-x)
+    return x**2 * np.exp(-x)
 
 def g(x):
     return x**(1/3)
@@ -52,3 +52,18 @@ trapg1 = trap("g", 0, 1, ng1)
 trapg2 = trap("g", 1, 2, ng2)
 print(f"PART B:  0 -> 1; Romberg answer: {answerg1}, Iterations: {ng1}, Trap answer: {trapg1}, Difference = {abs(trapg1 - answerg1)}")
 print(f"PART B:  1 -> 2; Romberg answer: {answerg2}, Iterations: {ng2}, Trap answer: {trapg2}, Difference = {abs(trapg2 - answerg2)}")
+
+# Part a 0 to 1: 
+def trap_optimization(function, a, b, max, min = 5):
+    for i in range(min, max):
+        trap_calc = trap(function, a, b, i)
+        _, rom_calc = romberg(function, a, b)
+        if abs(trap_calc - rom_calc) < 1e-9:
+            return i, trap_calc
+    print("Not found")
+    return None
+
+print(trap_optimization("f", 0, 1, 6000, 5))
+print(trap_optimization("f", 1, 2, 6000, 5))
+print(trap_optimization("g", 0, 1, 1700, 1500))
+print(trap_optimization("g", 1, 2, 1700, 1500))
