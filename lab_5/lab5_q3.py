@@ -16,6 +16,7 @@ def dy_dt(y, t):
 def y(t):
     return (t**2)*(np.exp(-t**2))
 
+# Euler's Method
 def euler(h, t):
     y_arr = np.zeros(len(t))
     y_arr[0] = y1
@@ -27,6 +28,20 @@ def euler(h, t):
     
     return y_arr
 
+# Midpoint Rule
+def midpoint_rule(h, t):
+    y_arr = np.zeros(len(t))
+    y_arr[0] = y1
+    y = y1
+    for j in range(len(t)-1):
+        y_mid = y + (h/2) * dy_dt(y, t[j])
+        t_mid = t[j] + h/2
+        y = y + h * dy_dt(y_mid, t_mid)
+        y_arr[j+1] = y
+    
+    return y_arr
+
+# Modified Euler's Method
 def mod_euler(h, t):
     y_arr = np.zeros(len(t))
     y_arr[0] = y1
@@ -57,6 +72,7 @@ def ab_am_2step_pc(h, t):
         y_arr[j+1] = y
     return y_arr
 
+# Runge-Kutta 4th Order Method
 def rk4(h, t):
     y_arr = np.zeros(len(t))
     y_arr[0] = y1
@@ -75,8 +91,7 @@ def rk4(h, t):
     return y_arr
 
 # Create a new figure for comparing Euler methods with different n values
-# Plot exact solution
-t_pts = np.linspace(1, 2, 1000)  # Fine grid for smooth exact solution
+t_pts = np.linspace(1, 2, 1000)
 plt.plot(t_pts, y(t_pts), label='Exact Solution', color='black', linewidth=3)
 for i in range(3, max_n):
     h = 2**(-i)
@@ -86,6 +101,20 @@ for i in range(3, max_n):
 plt.xlabel('t')
 plt.ylabel('y(t)')
 plt.title("Euler's Method vs Exact Solution")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Plot midpoint rule solutions for different n values
+plt.plot(t_pts, y(t_pts), label='Exact Solution', color='black', linewidth=3)
+for i in range(3, max_n):
+    h = 2**(-i)
+    t = np.arange(1, 2 + h, h)
+    midpoint_sol = midpoint_rule(h, t)
+    plt.plot(t, midpoint_sol, label=f'n={i}')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title("Midpoint Rule vs Exact Solution")
 plt.legend()
 plt.grid()
 plt.show()
@@ -154,6 +183,23 @@ plt.grid(True)
 plt.yscale('log')  # Using log scale for better visibility of errors
 plt.show()
 
+# Midpoint Rule Errors
+plt.figure(figsize=(10, 6))
+for i, n in enumerate(range(3, max_n)):
+    h = 2**(-n)
+    t = np.arange(1, 2 + h, h)
+    exact = y(t)
+    midpoint_sol = midpoint_rule(h, t)
+    midpoint_error = np.abs(midpoint_sol - exact)
+    plt.plot(t, midpoint_error, color=colors[i], label=f'n={n}', alpha=0.7)
+plt.xlabel('t')
+plt.ylabel('Absolute Error')
+plt.title("Midpoint Rule Error vs t for Different n")
+plt.legend()
+plt.grid(True)
+plt.yscale('log')
+plt.show()
+
 # Modified Euler Method Errors
 plt.figure(figsize=(10, 6))
 for i, n in enumerate(range(3, max_n)):
@@ -209,6 +255,7 @@ plt.show()
 n_values = range(3, max_n)
 h_values = [2**(-n) for n in n_values]
 euler_errors_at_2 = []
+midpoint_errors_at_2 = []
 mod_euler_errors_at_2 = []
 ab_am_errors_at_2 = []
 rk4_errors_at_2 = []
@@ -220,6 +267,7 @@ for n in n_values:
     exact = y(t)
     
     euler_errors_at_2.append(np.abs(euler(h, t)[-1] - exact[-1]))
+    midpoint_errors_at_2.append(np.abs(midpoint_rule(h, t)[-1] - exact[-1]))
     mod_euler_errors_at_2.append(np.abs(mod_euler(h, t)[-1] - exact[-1]))
     ab_am_errors_at_2.append(np.abs(ab_am_2step_pc(h, t)[-1] - exact[-1]))
     rk4_errors_at_2.append(np.abs(rk4(h, t)[-1] - exact[-1]))
@@ -228,6 +276,7 @@ for n in n_values:
 plt.figure(figsize=(10, 6))
 h_reciprocal = [1/h for h in h_values]
 plt.loglog(h_reciprocal, euler_errors_at_2, 'o-', label='Euler Method')
+plt.loglog(h_reciprocal, midpoint_errors_at_2, 'o-', label='Midpoint Rule')
 plt.loglog(h_reciprocal, mod_euler_errors_at_2, 'o-', label='Modified Euler Method')
 plt.loglog(h_reciprocal, ab_am_errors_at_2, 'o-', label='A-B/A-M 2-step PC Method')
 plt.loglog(h_reciprocal, rk4_errors_at_2, 'o-', label='RK4 Method')
