@@ -5,6 +5,7 @@
 
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Solve an initial-value problem
 
@@ -56,8 +57,22 @@ def ab_am_2step_pc(h, t):
         y_arr[j+1] = y
     return y_arr
 
-def rk4(n, h, t):
-    return None
+def rk4(h, t):
+    y_arr = np.zeros(len(t))
+    y_arr[0] = y1
+    y = y1
+    for j in range(len(t)-1):
+        t_j = t[j]
+        t_mid = t_j + h/2
+        t_next = t_j + h
+        k1 = dy_dt(y, t_j)
+        k2 = dy_dt(y + (h/2) * k1, t_mid)
+        k3 = dy_dt(y + (h/2) * k2, t_mid)
+        k4 = dy_dt(y + h * k3, t_next)
+        y = y + (h/6.0) * (k1 + 2*k2 + 2*k3 + k4)
+        y_arr[j+1] = y
+
+    return y_arr
 
 for i in range(3, 100):
     h = 2**(-i)
