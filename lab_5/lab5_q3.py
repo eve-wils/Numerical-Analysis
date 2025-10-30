@@ -47,10 +47,13 @@ def ab_am_2step_pc(h, t):
             # Use Euler's method for the first step
             y = y + h * dy_dt(y, t[j])
         else:
+            fi = dy_dt(y, t[j])
+            fi_1 = dy_dt(y_arr[j-1], t[j-1])
             # Predictor step (Adams-Bashforth)
             y_pred = y + (h/2) * (3 * dy_dt(y, t[j]) - dy_dt(y_arr[j-1], t[j-1]))
             # Corrector step (Adams-Moulton)
-            y = y + (h/2) * (dy_dt(y, t[j]) + dy_dt(y_pred, t[j+1]))
+            fi_plus1 = dy_dt(y_pred, t[j+1])
+            y = y + (h/12) * (8*fi + 5*fi_plus1 - fi_1)
         y_arr[j+1] = y
     return y_arr
 
@@ -221,7 +224,7 @@ for n in n_values:
     ab_am_errors_at_2.append(np.abs(ab_am_2step_pc(h, t)[-1] - exact[-1]))
     rk4_errors_at_2.append(np.abs(rk4(h, t)[-1] - exact[-1]))
 
-# Create convergence plot
+# Create absolute error plot
 plt.figure(figsize=(10, 6))
 h_reciprocal = [1/h for h in h_values]
 plt.loglog(h_reciprocal, euler_errors_at_2, 'o-', label='Euler Method')
@@ -230,7 +233,7 @@ plt.loglog(h_reciprocal, ab_am_errors_at_2, 'o-', label='A-B/A-M 2-step PC Metho
 plt.loglog(h_reciprocal, rk4_errors_at_2, 'o-', label='RK4 Method')
 plt.xlabel('1/h')
 plt.ylabel('Absolute Error at t=2')
-plt.title('Convergence Analysis (log-log scale)')
+plt.title('Absolute Error at y(2) for each method (log-log scale)')
 plt.legend()
 plt.grid(True)
 plt.show()
