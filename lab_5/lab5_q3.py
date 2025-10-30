@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 y1 = np.exp(-1)
+max_n = 10
 
 def dy_dt(y, t):
     return 2*y*(1/t - t)
@@ -70,58 +71,166 @@ def rk4(h, t):
 
     return y_arr
 
-for i in range(3, 100):
+# Create a new figure for comparing Euler methods with different n values
+# Plot exact solution
+t_pts = np.linspace(1, 2, 1000)  # Fine grid for smooth exact solution
+plt.plot(t_pts, y(t_pts), label='Exact Solution', color='black', linewidth=3)
+for i in range(3, max_n):
     h = 2**(-i)
-    # Create an array points t from 1 to 2 with delta_t
     t = np.arange(1, 2 + h, h)
-    # Call each method to solve the ODE
-    euler_solve = euler(i, h, t)
-    mod_euler_solve = mod_euler(i, h, t)
-    ab_am_solve = ab_am_2step_pc(i, h, t)
-    rk4_solve = rk4(i, h, t)
-    # Compute the exact solution at each point in t
-    exact_solution = y(t)
-    # Compute the absolute value of the error at each point in t for each method
-    euler_error = np.abs(euler_solve - exact_solution)
-    mod_euler_error = np.abs(mod_euler_solve - exact_solution)
-    ab_am_error = np.abs(ab_am_solve - exact_solution)
-    rk4_error = np.abs(rk4_solve - exact_solution)
-
-# Plot the solutions vs exact solution
-
-plt.plot(t, exact_solution, label='Exact Solution', color='black')
-plt.plot(t, euler_solve, label='Euler Method', linestyle='dashed')
-plt.plot(t, mod_euler_solve, label='Modified Euler Method', linestyle='dashed')
-plt.plot(t, ab_am_solve, label='Adams-Bashforth Adams-Moulton 2-step PC Method', linestyle='dashed')
-plt.plot(t, rk4_solve, label='RK4 Method', linestyle='dashed')
+    euler_sol = euler(h, t)
+    plt.plot(t, euler_sol, label=f'n={i}')
 plt.xlabel('t')
 plt.ylabel('y(t)')
-plt.title('Numerical Solutions vs Exact Solution')
+plt.title("Euler's Method vs Exact Solution")
 plt.legend()
 plt.grid()
 plt.show()
 
-# Plot error for each as a function of t
-plt.plot(t, euler_error, label='Euler Method Error', linestyle='dashed')
-plt.plot(t, mod_euler_error, label='Modified Euler Method Error', linestyle='dashed')
-plt.plot(t, ab_am_error, label='Adams-Bashforth Adams-Moulton 2-step PC Method Error', linestyle='dashed')
-plt.plot(t, rk4_error, label='RK4 Method Error', linestyle='dashed')
+# Plot modified Euler solutions for different n values
+plt.plot(t_pts, y(t_pts), label='Exact Solution', color='black', linewidth=3)
+for i in range(3, max_n):
+    h = 2**(-i)
+    t = np.arange(1, 2 + h, h)
+    mod_euler_sol = mod_euler(h, t)
+    plt.plot(t, mod_euler_sol, label=f'n={i}')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title("Modified Euler's Method vs Exact Solution")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Plot Adams-Bashforth Adams-Moulton 2-step PC solutions for different n values
+plt.plot(t_pts, y(t_pts), label='Exact Solution', color='black', linewidth=3)
+for i in range(3, max_n):
+    h = 2**(-i)
+    t = np.arange(1, 2 + h, h)
+    ab_am_sol = ab_am_2step_pc(h, t)
+    plt.plot(t, ab_am_sol, label=f'n={i}')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title("A-B/A-M 2-step PC Method vs Exact Solution")
+plt.legend()
+plt.grid()
+plt.show()
+
+# Plot RK4 solutions for different n values
+plt.plot(t_pts, y(t_pts), label='Exact Solution', color='black', linewidth=3)
+for i in range(3, max_n):
+    h = 2**(-i)
+    t = np.arange(1, 2 + h, h)
+    rk4_sol = rk4(h, t)
+    plt.plot(t, rk4_sol, label=f'n={i}')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title("RK4 Method vs Exact Solution")
+plt.legend()
+plt.grid()
+plt.show()
+
+###  Plot error for each method as a function of t ###
+
+# Plot error vs t for each method, showing all n values on the same plot
+colors = ['red', 'blue', 'green', 'purple', 'orange', 'brown', 'pink', 'gray']
+
+# Euler Method Errors
+plt.figure(figsize=(10, 6))
+for i, n in enumerate(range(3, max_n)):
+    h = 2**(-n)
+    t = np.arange(1, 2 + h, h)
+    exact = y(t)
+    euler_sol = euler(h, t)
+    euler_error = np.abs(euler_sol - exact)
+    plt.plot(t, euler_error, color=colors[i], label=f'n={n}', alpha=0.7)
 plt.xlabel('t')
 plt.ylabel('Absolute Error')
-plt.title('Absolute Error of Numerical Methods')
+plt.title("Euler's Method Error vs t for Different n")
 plt.legend()
-plt.grid()
+plt.grid(True)
+plt.yscale('log')  # Using log scale for better visibility of errors
 plt.show()
 
-# Plot the absolute val of error at y(2) vs 1/delta_t w/ log-log scale
-plt.loglog(1/h, euler_error[-1], 'o', label='Euler Method Error at t=2')
-plt.loglog(1/h, mod_euler_error[-1], 'o', label='Modified Euler Method Error at t=2')
-plt.loglog(1/h, ab_am_error[-1], 'o', label='Adams-Bashforth Adams-Moulton 2-step PC Method Error at t=2')
-plt.loglog(1/h, rk4_error[-1], 'o', label='RK4 Method Error at t=2')
+# Modified Euler Method Errors
+plt.figure(figsize=(10, 6))
+for i, n in enumerate(range(3, max_n)):
+    h = 2**(-n)
+    t = np.arange(1, 2 + h, h)
+    exact = y(t)
+    mod_euler_sol = mod_euler(h, t)
+    mod_euler_error = np.abs(mod_euler_sol - exact)
+    plt.plot(t, mod_euler_error, color=colors[i], label=f'n={n}', alpha=0.7)
+plt.xlabel('t')
+plt.ylabel('Absolute Error')
+plt.title("Modified Euler's Method Error vs t for Different n")
+plt.legend()
+plt.grid(True)
+plt.yscale('log')
+plt.show()
+
+# AB-AM Method Errors
+plt.figure(figsize=(10, 6))
+for i, n in enumerate(range(3, max_n)):
+    h = 2**(-n)
+    t = np.arange(1, 2 + h, h)
+    exact = y(t)
+    ab_am_sol = ab_am_2step_pc(h, t)
+    ab_am_error = np.abs(ab_am_sol - exact)
+    plt.plot(t, ab_am_error, color=colors[i], label=f'n={n}', alpha=0.7)
+plt.xlabel('t')
+plt.ylabel('Absolute Error')
+plt.title("A-B/A-M 2-step PC Method Error vs t for Different n")
+plt.legend()
+plt.grid(True)
+plt.yscale('log')
+plt.show()
+
+# RK4 Method Errors
+plt.figure(figsize=(10, 6))
+for i, n in enumerate(range(3, max_n)):
+    h = 2**(-n)
+    t = np.arange(1, 2 + h, h)
+    exact = y(t)
+    rk4_sol = rk4(h, t)
+    rk4_error = np.abs(rk4_sol - exact)
+    plt.plot(t, rk4_error, color=colors[i], label=f'n={n}', alpha=0.7)
+plt.xlabel('t')
+plt.ylabel('Absolute Error')
+plt.title("RK4 Method Error vs t for Different n")
+plt.legend()
+plt.grid(True)
+plt.yscale('log')
+plt.show()
+
+# Calculate errors at t=2 for convergence analysis
+n_values = range(3, max_n)
+h_values = [2**(-n) for n in n_values]
+euler_errors_at_2 = []
+mod_euler_errors_at_2 = []
+ab_am_errors_at_2 = []
+rk4_errors_at_2 = []
+
+# Store the final error (at t=2) for each method and n value
+for n in n_values:
+    h = 2**(-n)
+    t = np.arange(1, 2 + h, h)
+    exact = y(t)
+    
+    euler_errors_at_2.append(np.abs(euler(h, t)[-1] - exact[-1]))
+    mod_euler_errors_at_2.append(np.abs(mod_euler(h, t)[-1] - exact[-1]))
+    ab_am_errors_at_2.append(np.abs(ab_am_2step_pc(h, t)[-1] - exact[-1]))
+    rk4_errors_at_2.append(np.abs(rk4(h, t)[-1] - exact[-1]))
+
+# Create convergence plot
+plt.figure(figsize=(10, 6))
+h_reciprocal = [1/h for h in h_values]
+plt.loglog(h_reciprocal, euler_errors_at_2, 'o-', label='Euler Method')
+plt.loglog(h_reciprocal, mod_euler_errors_at_2, 'o-', label='Modified Euler Method')
+plt.loglog(h_reciprocal, ab_am_errors_at_2, 'o-', label='A-B/A-M 2-step PC Method')
+plt.loglog(h_reciprocal, rk4_errors_at_2, 'o-', label='RK4 Method')
 plt.xlabel('1/h')
 plt.ylabel('Absolute Error at t=2')
-plt.title('Absolute Error at t=2 vs 1/h (log-log scale)')
+plt.title('Convergence Analysis (log-log scale)')
 plt.legend()
-plt.grid()
+plt.grid(True)
 plt.show()
-
