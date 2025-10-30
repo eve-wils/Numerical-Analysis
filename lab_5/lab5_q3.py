@@ -7,10 +7,6 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Solve an initial-value problem
-
-# interval 1 <=t <= 2
-
 y1 = np.exp(-1)
 
 def dy_dt(y, t):
@@ -93,7 +89,39 @@ for i in range(3, 100):
 
 # Plot the solutions vs exact solution
 
+plt.plot(t, exact_solution, label='Exact Solution', color='black')
+plt.plot(t, euler_solve, label='Euler Method', linestyle='dashed')
+plt.plot(t, mod_euler_solve, label='Modified Euler Method', linestyle='dashed')
+plt.plot(t, ab_am_solve, label='Adams-Bashforth Adams-Moulton 2-step PC Method', linestyle='dashed')
+plt.plot(t, rk4_solve, label='RK4 Method', linestyle='dashed')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title('Numerical Solutions vs Exact Solution')
+plt.legend()
+plt.grid()
+plt.show()
+
 # Plot error for each as a function of t
+plt.plot(t, euler_error, label='Euler Method Error', linestyle='dashed')
+plt.plot(t, mod_euler_error, label='Modified Euler Method Error', linestyle='dashed')
+plt.plot(t, ab_am_error, label='Adams-Bashforth Adams-Moulton 2-step PC Method Error', linestyle='dashed')
+plt.plot(t, rk4_error, label='RK4 Method Error', linestyle='dashed')
+plt.xlabel('t')
+plt.ylabel('Absolute Error')
+plt.title('Absolute Error of Numerical Methods')
+plt.legend()
+plt.grid()
+plt.show()
 
 # Plot the absolute val of error at y(2) vs 1/delta_t w/ log-log scale
+plt.loglog(1/h, euler_error[-1], 'o', label='Euler Method Error at t=2')
+plt.loglog(1/h, mod_euler_error[-1], 'o', label='Modified Euler Method Error at t=2')
+plt.loglog(1/h, ab_am_error[-1], 'o', label='Adams-Bashforth Adams-Moulton 2-step PC Method Error at t=2')
+plt.loglog(1/h, rk4_error[-1], 'o', label='RK4 Method Error at t=2')
+plt.xlabel('1/h')
+plt.ylabel('Absolute Error at t=2')
+plt.title('Absolute Error at t=2 vs 1/h (log-log scale)')
+plt.legend()
+plt.grid()
+plt.show()
 
