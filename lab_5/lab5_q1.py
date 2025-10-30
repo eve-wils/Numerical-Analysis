@@ -61,9 +61,9 @@ def trap_optimization(function, a, b, max, min = 5):
         if abs(trap_calc - rom_calc) < 1e-9:
             return i, trap_calc
     print("Not found")
-    return None
+    return i, trap_calc
 
 print(trap_optimization("f", 0, 1, 6000, 5))
 print(trap_optimization("f", 1, 2, 6000, 5))
-print(trap_optimization("g", 0, 1, 1700, 1500))
-print(trap_optimization("g", 1, 2, 1700, 1500))
+print(trap_optimization("g", 0, 1, 2000, 1700))
+print(trap_optimization("g", 1, 2, 6000, 5))
