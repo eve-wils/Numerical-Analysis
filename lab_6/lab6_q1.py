@@ -26,7 +26,11 @@ Na = Rk4(alpha, h)
 N1 = Rk4(1, h)
 N2 = Rk4(2, h)
 
-dNa_dt = Na(A_alpha - B_alpha * N_alpha)
+# Coupled pair of nonlinear first-order differential equations:
+dN1_dt = N1*(A_alpha[0] - B_alpha[0]*N1 - C_alpha[0]*N2)
+dN2_dt = N2*(A_alpha[1] - B_alpha[1]*N2 - C_alpha[1]*N1)
+
+# Other relationships
 birth_rate = A_alpha * Na
 disease_death = B_alpha * Na ** 2
 food_death = C_alpha * N1 * N2
