@@ -54,12 +54,27 @@ plt.grid()
 plt.show()
 
 # Plot N1(10) and N2(10) logarithmic errors log10(1/h) for optimal step size vs increased by 2, 4, 8, and 16
+h_values = [h_optimal * (2**i) for i in range(5)]
+h_array = np.array(h_values)
+
 errors_N1 = []
 errors_N2 = []
-plt.plot(errors_N1, label='log10(1/h) for N1(10)')
-plt.plot(errors_N2, label='log10(1/h) for N2(10)')
-plt.title('Logarithmic Errors for N1(10) and N2(10)')
-plt.xlabel('Step Size Index')
-plt.ylabel('Logarithmic Error')
+N1_optimal = Z[0,-1]
+N2_optimal = Z[1,-1]
+for h in h_values:
+    Z_new, _ = Rk4(h)
+    errors_N1.append(np.log10(np.abs(Z_new[0,-1] - N1_optimal)))
+    errors_N2.append(np.log10(np.abs(Z_new[1,-1] - N2_optimal)))
+x = np.log10(1.0/h_array)
+x_plot = x[1:]
+y1_plot = np.array(errors_N1[1:])
+y2_plot = np.array(errors_N2[1:])
+plt.figure()
+plt.plot(x_plot, y1_plot, label='N1(10) error')
+plt.plot(x_plot, y2_plot, label='N2(10) error')
+plt.title('log10(error) vs log10(1/h)')
+plt.xlabel('log10(1/h)')
+plt.ylabel('log10(|N_alpha(10) - reference|)')
 plt.legend()
-plt.grid()
+plt.grid(True)
+plt.show()
