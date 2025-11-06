@@ -52,6 +52,7 @@ t_exact = np.linspace(0, tmax, 500)
 y_exact = y(t_exact, a, y_0)
 
 # Plotting
+plt.figure(figsize=(10, 6))
 plt.plot(t_exact, y_exact, 'k-', linewidth=2, label='Analytic $y=50e^{-at}$')
 
 # Loop over all h values and plot each numerical result
