@@ -113,7 +113,7 @@ def secant_method(f, u0, u1, h, tol=1e-8, max_iter=50):
 u_guess_0 = -0.1
 u_guess_1 = -0.05
 
-step_sizes_to_test = [1.0, 0.5, 0.25]
+step_sizes_to_test = [1.0, 0.5, 0.25, 0.0625]
 
 print("Solving Problem 1: Nonlinear Beam Deflection")
 
